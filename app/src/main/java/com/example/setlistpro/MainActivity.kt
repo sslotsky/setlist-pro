@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,7 +36,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            var selectedFileUri by remember { mutableStateOf<Uri?>(null) }
+            val selectedFileUris = remember { mutableStateSetOf<Uri>() }
 
             SetListProTheme {
                 Scaffold(
@@ -42,7 +44,8 @@ class MainActivity : ComponentActivity() {
                     floatingActionButton = {
                         PdfSelectionButton(
                             onPdfSelected = { uri ->
-                                selectedFileUri = uri
+                                println("Rendering URI: $uri")
+                                selectedFileUris.add(uri)
                             }
                         )
                     }
@@ -55,18 +58,26 @@ class MainActivity : ComponentActivity() {
                             .offset(x = 100.dp)
                             .fillMaxSize()
                     ) {
-                        selectedFileUri?.let { uri ->
-                            val context = LocalContext.current
-                            val bitmap = renderPdfFromUri(context, uri)
+                        LazyColumn {
+                            items(
+                                count = selectedFileUris.size,
+                                key = { index -> selectedFileUris.elementAt(index) },
+                                itemContent = { index ->
+                                    val uri = selectedFileUris.elementAt(index)
+                                    println("URI: $uri")
 
-                            bitmap?.let {
-                                Image(
-                                    bitmap = it.asImageBitmap(),
-                                    contentDescription = "PDF Page"
-                                )
-                            }
+                                    val context = LocalContext.current
+                                    val bitmap = renderPdfFromUri(context, uri)
+
+                                    bitmap?.let {
+                                        Image(
+                                            bitmap = it.asImageBitmap(),
+                                            contentDescription = "PDF Page"
+                                        )
+                                    }
+                                }
+                            )
                         }
-
                     }
                 }
             }
