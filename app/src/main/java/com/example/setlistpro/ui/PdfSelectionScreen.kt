@@ -4,23 +4,18 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
-import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,8 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import java.io.File
 import androidx.core.graphics.createBitmap
 
 @Composable
@@ -52,37 +45,37 @@ fun PdfSelectionScreen(
         }
     }
 
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.fillMaxSize()
-    ) {
-        selectedFileUri?.let { uri ->
-            val context = LocalContext.current
-            val fileName = getFileName(context, uri)
-            Text(text = "Selected: $fileName")
-            val bitmap = renderPdfFromUri(context, uri)
-
-            bitmap?.let {
-                Image(
-                    bitmap = it.asImageBitmap(),
-                    contentDescription = "PDF Page"
-                )
-            }
-        }
-
-        Column(
-            modifier = modifier.fillMaxSize().offset(x = (-16).dp),
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.End
-        ) {
+    Scaffold(
+        floatingActionButton = {
             SmallFloatingActionButton(
                 onClick = { launcher.launch("application/pdf") },
             ) {
                 Icon(Icons.Filled.Add, "Import PDF button")
             }
         }
+    ){ innerPadding ->
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = modifier.padding(innerPadding).fillMaxSize()
+        ) {
+            selectedFileUri?.let { uri ->
+                val context = LocalContext.current
+                val fileName = getFileName(context, uri)
+                Text(text = "Selected: $fileName")
+                val bitmap = renderPdfFromUri(context, uri)
+
+                bitmap?.let {
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = "PDF Page"
+                    )
+                }
+            }
+
+        }
     }
+
 }
 
 private fun getFileName(context: Context, uri: Uri): String? {
