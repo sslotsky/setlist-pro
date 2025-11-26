@@ -12,6 +12,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
 import com.example.setlistpro.ui.PdfSelectionButton
 import com.example.setlistpro.ui.theme.SetListProTheme
@@ -47,8 +49,11 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     Column(
                         verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(innerPadding).fillMaxSize()
+                        horizontalAlignment = Alignment.Start,
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .offset(x = 100.dp)
+                            .fillMaxSize()
                     ) {
                         selectedFileUri?.let { uri ->
                             val context = LocalContext.current
