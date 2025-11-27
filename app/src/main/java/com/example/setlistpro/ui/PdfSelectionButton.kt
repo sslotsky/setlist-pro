@@ -11,11 +11,11 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun PdfSelectionButton(
-    onPdfSelected: (Uri) -> Unit
+    onPdfSelected: (List<Uri>) -> Unit
 ) {
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
+        contract = ActivityResultContracts.GetMultipleContents()
+    ) { uri: List<Uri>? ->
         uri?.let {
             onPdfSelected(it)
         }

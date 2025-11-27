@@ -4,13 +4,15 @@ import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.graphics.createBitmap
 
 @Composable
 fun PdfPreview(
-    uri: Uri
+    uri: Uri,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val bitmap = renderPdfFromUri(context, uri)
@@ -18,7 +20,8 @@ fun PdfPreview(
     bitmap?.let {
         Image(
             bitmap = it.asImageBitmap(),
-            contentDescription = "PDF Page"
+            contentDescription = "PDF Page",
+            modifier = modifier
         )
     }
 }
