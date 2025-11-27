@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
@@ -87,7 +88,7 @@ class MainActivity : ComponentActivity() {
                                                 onDragStopped = {
                                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
                                                 },
-                                            )
+                                            ).alpha(if (isDragging) 0.7f else 1.0f)
                                         ) {
                                             PdfPreview(uri = uri)
                                         }
