@@ -11,8 +11,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -55,33 +57,26 @@ class MainActivity : ComponentActivity() {
                         horizontalAlignment = Alignment.Start,
                         modifier = Modifier
                             .padding(innerPadding)
-                            .offset(x = 100.dp)
                             .fillMaxSize()
                     ) {
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(minSize = 150.dp),
-                            contentPadding = PaddingValues(8.dp),
+                        FlowRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
-                        )  {
-                            items(
-                                count = selectedFileUris.size,
-                                key = { index -> selectedFileUris.elementAt(index) },
-                                itemContent = { index ->
-                                    val uri = selectedFileUris.elementAt(index)
-                                    println("URI: $uri")
+                        ) {
+                            selectedFileUris.forEach { uri ->
+                                val context = LocalContext.current
+                                val bitmap = renderPdfFromUri(context, uri)
 
-                                    val context = LocalContext.current
-                                    val bitmap = renderPdfFromUri(context, uri)
-
-                                    bitmap?.let {
-                                        Image(
-                                            bitmap = it.asImageBitmap(),
-                                            contentDescription = "PDF Page"
-                                        )
-                                    }
+                                bitmap?.let {
+                                    Image(
+                                        bitmap = it.asImageBitmap(),
+                                        contentDescription = "PDF Page"
+                                    )
                                 }
-                            )
+                            }
                         }
                     }
                 }
