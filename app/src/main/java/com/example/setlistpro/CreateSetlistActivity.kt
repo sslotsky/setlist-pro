@@ -67,7 +67,7 @@ class CreateSetlistActivity : ComponentActivity() {
                 selectedFileUris.add(to.index, selectedFileUris.removeAt(from.index))
             }
             val hapticFeedback = LocalHapticFeedback.current
-            val setlistName = remember { mutableStateOf("text") }
+            val setlistName = remember { mutableStateOf("") }
             val canSubmit by remember {
                 derivedStateOf {
                     setlistName.value.isNotEmpty() && selectedFileUris.isNotEmpty()
