@@ -1,6 +1,6 @@
 package com.example.setlistpro
 
-import PdfPreview
+import com.example.setlistpro.ui.PdfPreview
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -16,12 +16,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
@@ -37,41 +50,93 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val selectedFileUris = remember { mutableStateListOf<Uri>() }
+            val pressedFileUris = remember { mutableStateListOf<Uri>() }
+
             val lazyGridState = rememberLazyGridState()
             val reorderableLazyGridState = rememberReorderableLazyGridState(lazyGridState) { from, to ->
                 selectedFileUris.add(to.index, selectedFileUris.removeAt(from.index))
             }
             val hapticFeedback = LocalHapticFeedback.current
+            val setlistName = remember { mutableStateOf("text") }
+            val canSubmit by remember {
+                derivedStateOf {
+                    setlistName.value.isNotEmpty() && selectedFileUris.isNotEmpty()
+                }
+            }
+            println("can submit: $canSubmit")
 
 
             SetListProTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    floatingActionButton = {
-                        PdfSelectionButton(
-                            onPdfSelected = { uris ->
-                                uris.forEach { uri ->
-                                    if (!selectedFileUris.contains(uri)) {
-                                        selectedFileUris.add(uri)
+                    bottomBar = {
+                        BottomAppBar(
+                            actions = {
+                                IconButton(
+                                    enabled = canSubmit,
+                                    onClick = {
+                                        println("submitting")
+                                    },
+                                ) {
+                                    Icon(Icons.Filled.Done, contentDescription = "Save set list")
+                                }
+                                if (pressedFileUris.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = {
+                                            println("deleting")
+                                            pressedFileUris.forEach { uri ->
+                                                selectedFileUris.remove(uri)
+                                            }
+                                            pressedFileUris.clear()
+                                        },
+                                    ) {
+                                        Icon(Icons.Filled.Delete, contentDescription = "Delete selected charts")
                                     }
                                 }
+                            },
+                            floatingActionButton = {
+                                PdfSelectionButton(
+                                    onPdfSelected = { uris ->
+                                        uris.forEach { uri ->
+                                            if (!selectedFileUris.contains(uri)) {
+                                                selectedFileUris.add(uri)
+                                            }
+                                        }
+                                    }
+                                )
                             }
                         )
-                    }
+                    },
                 ) { innerPadding ->
                     Column(
-                        verticalArrangement = Arrangement.Center,
+                        verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.Start,
                         modifier = Modifier
                             .padding(innerPadding)
                             .fillMaxSize()
                     ) {
+
+                        TextField(
+                            value = setlistName.value,
+                            onValueChange = { newText ->
+                                setlistName.value = newText
+                            },
+                            label = { Text("Setlist Name") },
+                            colors = TextFieldDefaults.colors(
+                                unfocusedContainerColor = Color.White,
+                                focusedContainerColor = Color.White
+                            ),
+
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                        )
                         LazyVerticalGrid(
                             columns = GridCells.Adaptive(minSize = 150.dp),
                             contentPadding = PaddingValues(8.dp),
                             state = lazyGridState,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxSize()
                         ) {
                             items(
                                 count = selectedFileUris.size,
@@ -90,7 +155,13 @@ class MainActivity : ComponentActivity() {
                                                 },
                                             ).alpha(if (isDragging) 0.7f else 1.0f)
                                         ) {
-                                            PdfPreview(uri = uri)
+                                            PdfPreview(uri = uri, onSelected = { isSelected ->
+                                                if (isSelected && !pressedFileUris.contains(uri)) {
+                                                    pressedFileUris.add(uri)
+                                                } else if (!isSelected && pressedFileUris.contains(uri)) {
+                                                    pressedFileUris.remove(uri)
+                                                }
+                                            }, selected = pressedFileUris.contains(uri), selectOnClick = pressedFileUris.isNotEmpty())
                                         }
                                     }
                                 }

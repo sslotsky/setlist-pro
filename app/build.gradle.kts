@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.reorderable)
     implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

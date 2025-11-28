@@ -1,3 +1,5 @@
+package com.example.setlistpro.ui
+
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
@@ -5,38 +7,75 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
 
 @Composable
 fun PdfPreview(
     uri: Uri,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    selectOnClick: Boolean = false,
+    onSelected: (Boolean) -> Unit = {},
 ) {
     val context = LocalContext.current
     val bitmap = renderPdfFromUri(context, uri)
     val filename = getFileNameFromUri(context, uri)
 
     bitmap?.let {
-        Column(
-            modifier = modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                bitmap = it.asImageBitmap(),
-                contentDescription = filename,
-                modifier = Modifier.weight(1f)
-            )
-            Text(filename)
+        Box(contentAlignment = Alignment.TopEnd) {
+            Column(
+                modifier = modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    bitmap = it.asImageBitmap(),
+                    contentDescription = filename,
+                    modifier = Modifier
+                        .weight(1f)
+                        .combinedClickable(
+                            onLongClick = {
+                                onSelected(!selected)
+                            },
+                            onClick = {
+                                if (selected) {
+                                    onSelected(false)
+                                } else if (selectOnClick) {
+                                    onSelected(true)
+                                }
+                            },
+                            onDoubleClick = {
+                                onSelected(!selected)
+                            }
+                        )
+                )
+                Text(filename)
+            }
+            if (selected)
+                Icon(
+                    tint = Color(Color.Gray.value),
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = "$filename selected",
+                    modifier = Modifier.offset(-(16).dp, 8.dp)
+
+                )
         }
     }
 }
