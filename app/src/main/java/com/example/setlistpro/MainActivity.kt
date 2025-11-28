@@ -1,9 +1,11 @@
 package com.example.setlistpro
 
+import android.app.AlertDialog
 import com.example.setlistpro.ui.PdfPreview
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import com.example.setlistpro.ui.PdfSelectionButton
@@ -63,10 +66,31 @@ class MainActivity : ComponentActivity() {
                     setlistName.value.isNotEmpty() && selectedFileUris.isNotEmpty()
                 }
             }
-            println("can submit: $canSubmit")
 
+            val builder: AlertDialog.Builder = AlertDialog.Builder(LocalContext.current)
+            builder
+                .setMessage("Are you sure you want to remove the selected charts?")
+                .setTitle("Remove charts")
+                .setPositiveButton("Yes") { dialog, _ ->
+                    pressedFileUris.forEach { uri ->
+                        selectedFileUris.remove(uri)
+                    }
+                    pressedFileUris.clear()
+                    dialog.dismiss()
+                }
+                .setNegativeButton("No") { dialog, _ ->
+                    dialog.dismiss()
+                }
+
+            val dialog: AlertDialog = builder.create()
 
             SetListProTheme {
+                BackHandler(
+                    enabled = pressedFileUris.isNotEmpty(),
+                    onBack = {
+                        pressedFileUris.clear()
+                    }
+                )
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
@@ -83,11 +107,7 @@ class MainActivity : ComponentActivity() {
                                 if (pressedFileUris.isNotEmpty()) {
                                     IconButton(
                                         onClick = {
-                                            println("deleting")
-                                            pressedFileUris.forEach { uri ->
-                                                selectedFileUris.remove(uri)
-                                            }
-                                            pressedFileUris.clear()
+                                            dialog.show()
                                         },
                                     ) {
                                         Icon(Icons.Filled.Delete, contentDescription = "Delete selected charts")
