@@ -78,7 +78,12 @@ class MainActivity : ComponentActivity() {
                                         .fillMaxWidth()
                                         .padding(horizontal = 16.dp, vertical = 4.dp)
                                         .clickable {
-                                            // TODO: Handle click to view setlist details later
+                                            val intent = Intent(
+                                                this@MainActivity,
+                                                EditSetlistActivity::class.java
+                                            )
+                                            intent.putExtra("SETLIST_ID", setlist.id)
+                                            startActivity(intent)
                                         }
                                 ) {
                                     Column(modifier = Modifier.padding(16.dp)) {
