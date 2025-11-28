@@ -1,6 +1,7 @@
 package com.example.setlistpro
 
 import android.app.AlertDialog
+import android.content.Intent
 import com.example.setlistpro.ui.PdfPreview
 import android.net.Uri
 import android.os.Bundle
@@ -33,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -41,8 +43,11 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
+import com.example.setlistpro.data.AppDatabase
+import com.example.setlistpro.data.Setlist
 import com.example.setlistpro.ui.PdfSelectionButton
 import com.example.setlistpro.ui.theme.SetListProTheme
+import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 
@@ -51,6 +56,8 @@ class CreateSetlistActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val db = AppDatabase.getDatabase(applicationContext)
+
         setContent {
             val selectedFileUris = remember { mutableStateListOf<Uri>() }
             val pressedFileUris = remember { mutableStateListOf<Uri>() }
@@ -83,6 +90,8 @@ class CreateSetlistActivity : ComponentActivity() {
                 }
 
             val dialog: AlertDialog = builder.create()
+            val scope = rememberCoroutineScope()
+            val context = LocalContext.current
 
             SetListProTheme {
                 BackHandler(
@@ -100,6 +109,16 @@ class CreateSetlistActivity : ComponentActivity() {
                                     enabled = canSubmit,
                                     onClick = {
                                         println("submitting")
+                                        scope.launch {
+                                            val newSetlist = Setlist(
+                                                name = setlistName.value,
+                                                pdfUris = selectedFileUris.toList()
+                                            )
+                                            db.setlistDao().insertSetlist(newSetlist)
+
+                                            // Close activity or show success message
+                                            finish()
+                                        }
                                     },
                                 ) {
                                     Icon(Icons.Filled.Done, contentDescription = "Save set list")
@@ -119,6 +138,9 @@ class CreateSetlistActivity : ComponentActivity() {
                                     onPdfSelected = { uris ->
                                         uris.forEach { uri ->
                                             if (!selectedFileUris.contains(uri)) {
+                                                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                                context.contentResolver.takePersistableUriPermission(uri, takeFlags)
+
                                                 selectedFileUris.add(uri)
                                             }
                                         }
@@ -165,15 +187,22 @@ class CreateSetlistActivity : ComponentActivity() {
                                     val uri = selectedFileUris.elementAt(index)
                                     ReorderableItem(reorderableLazyGridState, key = uri) { isDragging ->
                                         Box(
-                                            modifier = Modifier.aspectRatio(0.7f).draggableHandle(
-                                                onDragStarted = {
-                                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+                                            modifier = Modifier
+                                                .aspectRatio(0.7f)
+                                                .draggableHandle(
+                                                    onDragStarted = {
+                                                        hapticFeedback.performHapticFeedback(
+                                                            HapticFeedbackType.GestureThresholdActivate
+                                                        )
 
-                                                },
-                                                onDragStopped = {
-                                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                                                },
-                                            ).alpha(if (isDragging) 0.7f else 1.0f)
+                                                    },
+                                                    onDragStopped = {
+                                                        hapticFeedback.performHapticFeedback(
+                                                            HapticFeedbackType.GestureEnd
+                                                        )
+                                                    },
+                                                )
+                                                .alpha(if (isDragging) 0.7f else 1.0f)
                                         ) {
                                             PdfPreview(uri = uri, onSelected = { isSelected ->
                                                 if (isSelected && !pressedFileUris.contains(uri)) {

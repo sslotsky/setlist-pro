@@ -14,14 +14,14 @@ fun PdfSelectionButton(
     onPdfSelected: (List<Uri>) -> Unit
 ) {
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetMultipleContents()
+        contract = ActivityResultContracts.OpenMultipleDocuments()
     ) { uri: List<Uri>? ->
         uri?.let {
             onPdfSelected(it)
         }
     }
     SmallFloatingActionButton(
-        onClick = { launcher.launch("application/pdf") },
+        onClick = { launcher.launch(arrayOf("application/pdf")) },
     ) {
         Icon(Icons.Filled.Add, "Import PDF button")
     }
