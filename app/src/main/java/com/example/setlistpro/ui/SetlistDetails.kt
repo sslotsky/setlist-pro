@@ -32,7 +32,7 @@ enum class Mode {
 }
 
 @Composable
-fun EditSetlistScreen(
+fun SetlistDetailsScreen(
     initialName: String = "",
     initialUris: List<Uri> = emptyList(),
     mode: Mode,
@@ -160,8 +160,8 @@ fun EditSetlistScreen(
             )
         },
     ) { innerPadding ->
-        val titleSize = MaterialTheme.typography.headlineMedium.fontSize.value;
-        val nameHeight = titleSize * 2;
+        val titleSize = MaterialTheme.typography.headlineMedium.fontSize.value
+        val nameHeight = titleSize * 2
 
         Column(
             verticalArrangement = Arrangement.Top,

@@ -1,5 +1,6 @@
 plugins {
     id("com.google.devtools.ksp")
+    kotlin("plugin.serialization") version "2.0.21"
 
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -45,10 +46,18 @@ android {
 
 dependencies {
     val roomVersion = "2.8.4"
+    val nav_version = "2.9.6"
 
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
+
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation("androidx.navigation:navigation-fragment:$nav_version")
+    implementation("androidx.navigation:navigation-ui:$nav_version")
+    implementation("androidx.navigation:navigation-dynamic-features-fragment:$nav_version")
+    androidTestImplementation("androidx.navigation:navigation-testing:$nav_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
