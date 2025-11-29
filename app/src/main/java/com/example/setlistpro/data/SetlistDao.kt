@@ -1,6 +1,7 @@
 package com.example.setlistpro.data
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -13,6 +14,9 @@ interface SetlistDao {
 
     @Update
     suspend fun updateSetlist(setlist: Setlist)
+
+    @Delete
+    fun deleteSetlist(setlist: Setlist)
 
     @Query("SELECT * FROM setlists ORDER BY id DESC")
     fun getAllSetlists(): Flow<List<Setlist>>
