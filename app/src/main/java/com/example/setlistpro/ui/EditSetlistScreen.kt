@@ -9,8 +9,10 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -25,18 +27,24 @@ import androidx.compose.ui.unit.dp
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 
+enum class Mode {
+    CREATE, VIEW
+}
+
 @Composable
 fun EditSetlistScreen(
     initialName: String = "",
     initialUris: List<Uri> = emptyList(),
-    onSave: (String, List<Uri>) -> Unit
+    mode: Mode,
+    onSave: (String, List<Uri>) -> Unit,
+    onCancel: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
     // Initialize state with passed-in values
     val setlistName = remember { mutableStateOf(initialName) }
     val selectedFileUris = remember { mutableStateListOf<Uri>().apply { addAll(initialUris) } }
-
+    val (isEditing, setIsEditing) = remember { mutableStateOf(mode == Mode.CREATE) }
     // Selection state for deletion
     val pressedFileUris = remember { mutableStateListOf<Uri>() }
 
@@ -81,15 +89,44 @@ fun EditSetlistScreen(
         bottomBar = {
             BottomAppBar(
                 actions = {
-                    IconButton(
-                        enabled = canSubmit,
-                        onClick = {
-                            // Trigger the callback with current data
-                            onSave(setlistName.value, selectedFileUris.toList())
-                        },
-                    ) {
-                        Icon(Icons.Filled.Done, contentDescription = "Save set list")
+                    if (mode == Mode.VIEW && !isEditing) {
+                        IconButton(
+                            onClick = {
+                                setIsEditing(true)
+                            },
+                        ) {
+                            Icon(Icons.Filled.Edit, contentDescription = "Edit set list")
+                        }
                     }
+                    if (mode == Mode.CREATE || isEditing) {
+                        IconButton(
+                            onClick = {
+                                onCancel()
+
+                                if (mode == Mode.VIEW) {
+                                    setIsEditing(false)
+                                    setlistName.value = initialName
+                                    selectedFileUris.clear()
+                                    selectedFileUris.addAll(initialUris)
+                                    pressedFileUris.clear()
+                                }
+                            },
+                        ) {
+                            Icon(Icons.Filled.Close, contentDescription = "Cancel")
+                        }
+                        IconButton(
+                            enabled = canSubmit,
+                            onClick = {
+                                onSave(setlistName.value, selectedFileUris.toList())
+                                if (mode == Mode.VIEW) {
+                                    setIsEditing(false)
+                                }
+                            },
+                        ) {
+                            Icon(Icons.Filled.Done, contentDescription = "Save set list")
+                        }
+                    }
+
                     if (pressedFileUris.isNotEmpty()) {
                         IconButton(
                             onClick = {
@@ -101,26 +138,31 @@ fun EditSetlistScreen(
                     }
                 },
                 floatingActionButton = {
-                    PdfSelectionButton(
-                        onPdfSelected = { uris ->
-                            uris.forEach { uri ->
-                                if (!selectedFileUris.contains(uri)) {
-                                    // Handle permission persistence inside the screen or utility
-                                    try {
-                                        val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                        context.contentResolver.takePersistableUriPermission(uri, takeFlags)
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
+                    if (isEditing) {
+                        PdfSelectionButton(
+                            onPdfSelected = { uris ->
+                                uris.forEach { uri ->
+                                    if (!selectedFileUris.contains(uri)) {
+                                        // Handle permission persistence inside the screen or utility
+                                        try {
+                                            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                            context.contentResolver.takePersistableUriPermission(uri, takeFlags)
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                        }
+                                        selectedFileUris.add(uri)
                                     }
-                                    selectedFileUris.add(uri)
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             )
         },
     ) { innerPadding ->
+        val titleSize = MaterialTheme.typography.headlineMedium.fontSize.value;
+        val nameHeight = titleSize * 2;
+
         Column(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start,
@@ -128,18 +170,32 @@ fun EditSetlistScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            TextField(
-                value = setlistName.value,
-                onValueChange = { newText ->
-                    setlistName.value = newText
-                },
-                label = { Text("Setlist Name") },
-                colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White
-                ),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            if (isEditing) {
+                TextField(
+                    value = setlistName.value,
+                    onValueChange = { newText ->
+                        setlistName.value = newText
+                    },
+                    label = { Text("Setlist Name") },
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = Color.White,
+                        focusedContainerColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .height(nameHeight.dp)
+
+                    )
+            } else {
+                Text(
+                    text = setlistName.value,
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .height(nameHeight.dp)
+                    )
+            }
+
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 150.dp),
                 contentPadding = PaddingValues(8.dp),
@@ -153,7 +209,7 @@ fun EditSetlistScreen(
                     key = { index -> selectedFileUris.elementAt(index) },
                     itemContent = { index ->
                         val uri = selectedFileUris.elementAt(index)
-                        ReorderableItem(reorderableLazyGridState, key = uri) { isDragging ->
+                        ReorderableItem(reorderableLazyGridState, key = uri, enabled = isEditing) { isDragging ->
                             Box(
                                 modifier = Modifier
                                     .aspectRatio(0.7f)
@@ -174,10 +230,12 @@ fun EditSetlistScreen(
                                 PdfPreview(
                                     uri = uri,
                                     onSelected = { isSelected ->
-                                        if (isSelected && !pressedFileUris.contains(uri)) {
-                                            pressedFileUris.add(uri)
-                                        } else if (!isSelected && pressedFileUris.contains(uri)) {
-                                            pressedFileUris.remove(uri)
+                                        if (isEditing) {
+                                            if (isSelected && !pressedFileUris.contains(uri)) {
+                                                pressedFileUris.add(uri)
+                                            } else if (!isSelected && pressedFileUris.contains(uri)) {
+                                                pressedFileUris.remove(uri)
+                                            }
                                         }
                                     },
                                     selected = pressedFileUris.contains(uri),

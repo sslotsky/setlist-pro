@@ -8,6 +8,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import com.example.setlistpro.data.AppDatabase
 import com.example.setlistpro.data.Setlist
 import com.example.setlistpro.ui.EditSetlistScreen // Make sure to import your new Composable
+import com.example.setlistpro.ui.Mode
 import com.example.setlistpro.ui.theme.SetListProTheme
 import kotlinx.coroutines.launch
 
@@ -25,6 +26,8 @@ class CreateSetlistActivity : ComponentActivity() {
                 EditSetlistScreen(
                     initialName = "", // Empty for creation
                     initialUris = emptyList(), // Empty for creation
+                    mode = Mode.CREATE,
+                    onCancel = { finish() },
                     onSave = { name, uris ->
                         scope.launch {
                             val newSetlist = Setlist(

@@ -90,13 +90,12 @@ class MainActivity : ComponentActivity() {
                                             .fillMaxWidth()
                                             .padding(horizontal = 16.dp, vertical = 4.dp)
                                             .clickable {
-                                                println("TODO: show setlist")
-//                                                val intent = Intent(
-//                                                    this@MainActivity,
-//                                                    EditSetlistActivity::class.java
-//                                                )
-//                                                intent.putExtra("SETLIST_ID", setlist.id)
-//                                                startActivity(intent)
+                                                val intent = Intent(
+                                                    this@MainActivity,
+                                                    EditSetlistActivity::class.java
+                                                )
+                                                intent.putExtra("SETLIST_ID", setlist.id)
+                                                startActivity(intent)
                                             }
                                     ) {
                                         Column(modifier = Modifier.padding(16.dp)) {
@@ -111,47 +110,28 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
 
-                                    Row(
-                                        modifier = Modifier.offset(-(24).dp, 16.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    ) {
-                                        Icon(
-                                            tint = Color(Color.Black.value),
-                                            imageVector = Icons.Filled.Edit,
-                                            contentDescription = "Edit ${setlist.name}",
-                                            modifier = Modifier.clickable(onClick = {
-                                                val intent = Intent(
-                                                    this@MainActivity,
-                                                    EditSetlistActivity::class.java
-                                                )
-                                                intent.putExtra("SETLIST_ID", setlist.id)
-                                                startActivity(intent)
-                                            })
-                                        )
-                                        Icon(
-                                            tint = Color(Color.Black.value),
-                                            imageVector = Icons.Filled.Delete,
-                                            contentDescription = "Delete ${setlist.name}",
-                                            modifier = Modifier.clickable(onClick = {
-                                                val dialog = builder
-                                                    .setMessage("Delete setlist ${setlist.name}?")
-                                                    .setTitle("Delete Setlist")
-                                                    .setPositiveButton("Delete") { dialog, _ ->
-                                                        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                                                            db.setlistDao().deleteSetlist(setlist)
-                                                        }
-                                                        dialog.dismiss()
+                                    Icon(
+                                        tint = Color(Color.Black.value),
+                                        imageVector = Icons.Filled.Delete,
+                                        contentDescription = "Delete ${setlist.name}",
+                                        modifier = Modifier.offset(-(24).dp, 12.dp).clickable(onClick = {
+                                            val dialog = builder
+                                                .setMessage("Delete setlist ${setlist.name}?")
+                                                .setTitle("Delete Setlist")
+                                                .setPositiveButton("Delete") { dialog, _ ->
+                                                    lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                                        db.setlistDao().deleteSetlist(setlist)
                                                     }
-                                                    .setNegativeButton("Cancel") { dialog, _ ->
-                                                        dialog.dismiss()
-                                                    }
-                                                    .create()
+                                                    dialog.dismiss()
+                                                }
+                                                .setNegativeButton("Cancel") { dialog, _ ->
+                                                    dialog.dismiss()
+                                                }
+                                                .create()
 
-                                                dialog.show()
-//                                                db.setlistDao().deleteSetlist(setlist)
-                                            })
-                                        )
-                                    }
+                                            dialog.show()
+                                        })
+                                    )
                                 }
                             }
                         }

@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.setlistpro.data.AppDatabase
 import com.example.setlistpro.ui.EditSetlistScreen
+import com.example.setlistpro.ui.Mode
 import com.example.setlistpro.ui.theme.SetListProTheme
 import kotlinx.coroutines.launch
 
@@ -42,11 +43,11 @@ class EditSetlistActivity : ComponentActivity() {
                     EditSetlistScreen(
                         initialName = setlist.name,
                         initialUris = setlist.pdfUris,
+                        mode = Mode.VIEW,
                         onSave = { name, uris ->
                             scope.launch {
                                 val updatedSetlist = setlist.copy(name = name, pdfUris = uris)
                                 db.setlistDao().updateSetlist(updatedSetlist)
-                                finish()
                             }
                         }
                     )
