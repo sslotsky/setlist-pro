@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.setlistpro.ui.ChartScreen
 import com.example.setlistpro.ui.CreateSetlistScreen
 import com.example.setlistpro.ui.SetlistDetailsScreen
 import com.example.setlistpro.ui.SetlistsScreen
@@ -20,6 +21,8 @@ object BrowseSetlists
 object CreateSetlist
 @Serializable
 data class SetlistDetails(val id: Int)
+@Serializable
+data class Chart(val id: Int, val chartIndex: Int)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,11 +42,20 @@ class MainActivity : ComponentActivity() {
                     }
                     composable<SetlistDetails> { backStackEntry ->
                         val details: SetlistDetails = backStackEntry.toRoute()
-                        SetlistDetailsScreen(details.id)
+                        SetlistDetailsScreen(details.id, navigateToChart = { index ->
+                            navController.navigate(Chart(details.id, index))
+                        })
                     }
-                    composable<CreateSetlist> { CreateSetlistScreen(
-                        onFinish = { navController.popBackStack() }
-                    ) }
+                    composable<CreateSetlist> {
+                        CreateSetlistScreen(
+                            onFinish = { navController.popBackStack() }
+                        )
+                    }
+
+                    composable<Chart> { backStackEntry ->
+                        val chart: Chart = backStackEntry.toRoute()
+                        ChartScreen(chart.id, chart.chartIndex)
+                    }
                 }
             }
         }

@@ -33,6 +33,7 @@ fun PdfPreview(
     selected: Boolean = false,
     selectOnClick: Boolean = false,
     onSelected: (Boolean) -> Unit = {},
+    onClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val bitmap = renderPdfFromUri(context, uri)
@@ -59,6 +60,8 @@ fun PdfPreview(
                                     onSelected(false)
                                 } else if (selectOnClick) {
                                     onSelected(true)
+                                } else {
+                                    onClick()
                                 }
                             },
                             onDoubleClick = {

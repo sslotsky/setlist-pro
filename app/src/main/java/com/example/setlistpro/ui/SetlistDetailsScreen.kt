@@ -15,7 +15,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SetlistDetailsScreen(
-    setlistId: Int
+    setlistId: Int,
+    navigateToChart: (Int) -> Unit
 ) {
     val db = AppDatabase.getDatabase(LocalContext.current)
 
@@ -29,10 +30,11 @@ fun SetlistDetailsScreen(
         // Since existingSetlist is nullable in state, we unwrap it here
         val setlist = existingSetlist!!
 
-        SetlistDetailsScreen(
+        SetlistDetails(
             initialName = setlist.name,
             initialUris = setlist.pdfUris,
             mode = Mode.VIEW,
+            openChart = navigateToChart,
             onSave = { name, uris ->
                 scope.launch {
                     val updatedSetlist = setlist.copy(name = name, pdfUris = uris)

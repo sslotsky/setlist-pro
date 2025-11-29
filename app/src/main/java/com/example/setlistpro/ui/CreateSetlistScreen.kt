@@ -14,7 +14,7 @@ fun CreateSetlistScreen(onFinish: () -> Unit) {
 
     val scope = rememberCoroutineScope()
 
-    SetlistDetailsScreen(
+    SetlistDetails(
         initialName = "", // Empty for creation
         initialUris = emptyList(), // Empty for creation
         mode = Mode.CREATE,

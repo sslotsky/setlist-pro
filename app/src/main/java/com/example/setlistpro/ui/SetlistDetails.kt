@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -32,12 +33,13 @@ enum class Mode {
 }
 
 @Composable
-fun SetlistDetailsScreen(
+fun SetlistDetails(
     initialName: String = "",
     initialUris: List<Uri> = emptyList(),
     mode: Mode,
     onSave: (String, List<Uri>) -> Unit,
-    onCancel: () -> Unit = {}
+    onCancel: () -> Unit = {},
+    openChart: (Int) -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -239,7 +241,8 @@ fun SetlistDetailsScreen(
                                         }
                                     },
                                     selected = pressedFileUris.contains(uri),
-                                    selectOnClick = pressedFileUris.isNotEmpty()
+                                    selectOnClick = pressedFileUris.isNotEmpty(),
+                                    onClick = { openChart(index) }
                                 )
                             }
                         }
