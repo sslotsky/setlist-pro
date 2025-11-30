@@ -4,19 +4,41 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -78,6 +100,24 @@ fun SetlistDetails(
             dialog.dismiss()
         }
     val dialog: AlertDialog = builder.create()
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenMultipleDocuments()
+    ) { uris: List<Uri>? ->
+        uris?.let {
+            uris.forEach { uri ->
+                if (!selectedFileUris.contains(uri)) {
+                    // Handle permission persistence inside the screen or utility
+                    try {
+                        val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        context.contentResolver.takePersistableUriPermission(uri, takeFlags)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    selectedFileUris.add(uri)
+                }
+            }
+        }
+    }
 
     BackHandler(
         enabled = pressedFileUris.isNotEmpty(),
@@ -141,22 +181,11 @@ fun SetlistDetails(
                 },
                 floatingActionButton = {
                     if (isEditing) {
-                        PdfSelectionButton(
-                            onPdfSelected = { uris ->
-                                uris.forEach { uri ->
-                                    if (!selectedFileUris.contains(uri)) {
-                                        // Handle permission persistence inside the screen or utility
-                                        try {
-                                            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                            context.contentResolver.takePersistableUriPermission(uri, takeFlags)
-                                        } catch (e: Exception) {
-                                            e.printStackTrace()
-                                        }
-                                        selectedFileUris.add(uri)
-                                    }
-                                }
-                            }
-                        )
+                        SmallFloatingActionButton(
+                            onClick = { launcher.launch(arrayOf("application/pdf")) },
+                        ) {
+                            Icon(Icons.Filled.Add, "Import PDF button")
+                        }
                     }
                 }
             )
@@ -196,6 +225,21 @@ fun SetlistDetails(
                         .align(Alignment.CenterHorizontally)
                         .height(nameHeight.dp)
                     )
+            }
+
+            if (selectedFileUris.isEmpty()) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Text("No charts selected")
+                    Button(
+                        onClick = { launcher.launch(arrayOf("application/pdf")) },
+                    ) {
+                        Text("Add charts")
+                    }
+                }
             }
 
             LazyVerticalGrid(
