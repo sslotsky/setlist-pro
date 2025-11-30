@@ -137,7 +137,11 @@ fun SetlistDetails(
                                 setIsEditing(true)
                             },
                         ) {
-                            Icon(Icons.Filled.Edit, contentDescription = "Edit set list")
+                            Icon(
+                                Icons.Filled.Edit,
+                                tint = Color(MaterialTheme.colorScheme.primary.value),
+                                contentDescription = "Edit set list"
+                            )
                         }
                     }
                     if (mode == Mode.CREATE || isEditing) {
@@ -154,7 +158,11 @@ fun SetlistDetails(
                                 }
                             },
                         ) {
-                            Icon(Icons.Filled.Close, contentDescription = "Cancel")
+                            Icon(
+                                Icons.Filled.Close,
+                                tint = Color(MaterialTheme.colorScheme.primary.value),
+                                contentDescription = "Cancel"
+                            )
                         }
                         IconButton(
                             enabled = canSubmit,
@@ -165,7 +173,11 @@ fun SetlistDetails(
                                 }
                             },
                         ) {
-                            Icon(Icons.Filled.Done, contentDescription = "Save set list")
+                            Icon(
+                                Icons.Filled.Done,
+                                tint = Color(MaterialTheme.colorScheme.primary.value),
+                                contentDescription = "Save set list"
+                            )
                         }
                     }
 
@@ -209,8 +221,8 @@ fun SetlistDetails(
                     },
                     label = { Text("Setlist Name") },
                     colors = TextFieldDefaults.colors(
-                        unfocusedContainerColor = Color.White,
-                        focusedContainerColor = Color.White
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
                     ),
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)

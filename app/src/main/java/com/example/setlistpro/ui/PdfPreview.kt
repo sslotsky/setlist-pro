@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -73,11 +74,10 @@ fun PdfPreview(
             }
             if (selected)
                 Icon(
-                    tint = Color(Color.Gray.value),
+                    tint = Color(MaterialTheme.colorScheme.primary.value),
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = "$filename selected",
                     modifier = Modifier.offset(-(16).dp, 8.dp)
-
                 )
         }
     }

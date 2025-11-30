@@ -125,7 +125,7 @@ fun SetlistsScreen(
                             }
 
                             Icon(
-                                tint = Color(Color.Black.value),
+                                tint = Color(MaterialTheme.colorScheme.primary.value),
                                 imageVector = Icons.Filled.Delete,
                                 contentDescription = "Delete ${setlist.name}",
                                 modifier = Modifier
